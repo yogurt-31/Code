@@ -2,7 +2,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public abstract class UIPanel : MonoBehaviour
+public class UIPanel : MonoBehaviour
 {
     private Tween tween;
     private Tween noTouchTween;
