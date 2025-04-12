@@ -24,9 +24,6 @@ namespace JSY
 
         public int PoweredHp(int hp) => repeatCount != 0 ? hp * (waveCount - 38) + 40 * repeatCount : hp;
         public int PoweredReward(int r) => repeatCount != 0 ? r + 8 * repeatCount : r;
-        protected override void Awake()
-        {
-        }
 
         private void Start()
         {
