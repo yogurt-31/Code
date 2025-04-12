@@ -4,8 +4,8 @@ namespace JSY
 {
     public class UIManager : MonoSingleton<UIManager>
     {
-        public OptionUI optionUI { get; private set; }
-        public SpeedUI speedUI { get; private set; }
+        public OptionUI OptionUI { get; private set; }
+        public SpeedUI SpeedUI { get; private set; }
         public ResultUI ResultUI { get; private set; }
         public NoticeUI NoticeUI { get; private set; }
         public EnemyCountUI EnemyCountUI { get; private set; }
@@ -14,8 +14,8 @@ namespace JSY
         protected override void Awake()
         {
             base.Awake();
-            optionUI = GetComponent<OptionUI>();
-            speedUI = GetComponent<SpeedUI>();
+            OptionUI = GetComponent<OptionUI>();
+            SpeedUI = GetComponent<SpeedUI>();
             ResultUI = GetComponent<ResultUI>();
             NoticeUI = GetComponent<NoticeUI>();
             EnemyCountUI = GetComponent<EnemyCountUI>();
