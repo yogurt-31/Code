@@ -1,8 +1,6 @@
-using AYellowpaper.SerializedCollections;
 using JMT.Building;
 using JMT.Core.Tool;
 using JMT.Planets.Tile;
-using JMT.Resource;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,13 +10,13 @@ namespace JMT.UISystem
 {
     public class CreateUI : PanelUI
     {
-        private List<ItemCellUI> itemCells;
+        private List<CellUI> itemCells;
         private Button createButton;
         private CreateItemSO currentItemSO;
         private ItemBuilding workBuilding;
         private void Awake()
         {
-            itemCells = PanelTrm.Find("Left").GetComponentsInChildren<ItemCellUI>().ToList();
+            itemCells = PanelTrm.Find("Left").GetComponentsInChildren<CellUI>().ToList();
             createButton = PanelTrm.Find("Right").Find("CreateBtn").GetComponent<Button>();
             createButton.onClick.AddListener(HandleCreateButton);
         }
@@ -29,38 +27,51 @@ namespace JMT.UISystem
 
             Debug.Log(TileManager.Instance.CurrentTile.CurrentBuilding);
             workBuilding = TileManager.Instance.CurrentTile.CurrentBuilding as ItemBuilding;
+            if (workBuilding == null)
+            {
+                Debug.LogError("작업대가 아닙니다.");
+                return;
+            }
             var ItemList = workBuilding.data.CreateItemList;
 
             if (workBuilding != null)
                 SetItemList(ItemList);
 
-            for (int i = 0; i < ItemList.Count; i++)
+            int index = 0;
+            foreach (var item in ItemList)
             {
-                int value = i;
-                itemCells[value].GetComponent<Button>().onClick.AddListener(() =>
+                int capturedIndex = index;
+
+                itemCells[capturedIndex].GetComponent<Button>().onClick.AddListener(() =>
                 {
-                    currentItemSO = ItemList[value];
-                    CreateItemUI.Instance.SetCreatePanel(ItemList[value]);
+                    currentItemSO = item;
+                    CreateItemUI.Instance.SetCreatePanel(item);
                 });
+
+                index++;
             }
         }
 
-        public void SetItemList(List<CreateItemSO> createItemList)
+        public void SetItemList(SizeLimitQueue<CreateItemSO> createItemList)
         {
-            for (int i = 0; i < itemCells.Count; ++i)
+            int index = 0;
+            foreach (var item in createItemList)
             {
-                if (createItemList.Count <= i) return;
+                if (index >= itemCells.Count) break;
 
-                InventoryManager.Instance.ItemDictionary.TryGetValue(createItemList[i].ResultItem, out int value);
-                itemCells[i].SetItemCell(createItemList[i].ResultItem.ItemName, value, createItemList[i].ResultItem.Icon);
+                GameUIManager.Instance.InventoryCompo.InventorySO.ItemDictionary.TryGetValue(item.ResultItem, out int value);
+                itemCells[index].SetCell(item.ResultItem, value.ToString());
+
+                index++;
             }
         }
 
         private void HandleCreateButton()
         {
-            if(currentItemSO.UseFuelCount > ResourceManager.Instance.CurrentFuelValue) return;
+            if (currentItemSO.UseFuelCount > GameUIManager.Instance.ResourceCompo.CurrentFuelValue) return;
+            if (workBuilding.data.Works.IsFull()) return;
 
-            ResourceManager.Instance.AddFuel(-currentItemSO.UseFuelCount);
+            GameUIManager.Instance.ResourceCompo.AddFuel(-currentItemSO.UseFuelCount);
             Debug.Log("작업을 시작합니다~!~! 대기열 리스트에 넣었습니당");
             BuildingWork work = new(currentItemSO.ResultItem.ItemType, currentItemSO.CreateTime);
             workBuilding.data.AddWork(work);
